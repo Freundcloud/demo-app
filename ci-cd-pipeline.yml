@@ -1,0 +1,34 @@
+trigger:
+  - main
+
+pool:
+  vmImage: "ubuntu-latest"
+
+resources:
+  repositories:
+    - repository: templates
+      type: git
+      name: aks-demo-shared-pipelines
+      ref: refs/heads/master
+
+stages:
+  - stage: backe-end
+    jobs:
+      - template: microservice/ci-cd-stages.yml@templates
+        parameters:
+          serviceDockerFile: "back-end/Dockerfile"
+          serviceDockerFileArgs: ""
+          serviceImageTag: "$(Build.BuildNumber)"
+          serviceName: "aks-demo-app"
+          kubernetesFile: "./k8s/backend.yml"
+
+  - stage: front-end
+    jobs:
+      - template: microservice/ci-cd-stages.yml@templates
+        parameters:
+          serviceDockerFile: "front-end/Dockerfile"
+          serviceDockerFileArgs: ""
+          serviceImageTag: "$(Build.BuildNumber)"
+          serviceName: "aks-demo-app"
+          kubernetesFile: "./k8s/frontend.yml"
+          AppInsightsKey: "$(pipeline-var-dev-app-insights)"
